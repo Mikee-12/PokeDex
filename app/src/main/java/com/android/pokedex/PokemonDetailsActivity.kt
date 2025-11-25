@@ -6,12 +6,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.ui.res.stringResource
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,7 +44,7 @@ class PokemonDetailsActivity : ComponentActivity() {
             PokedexTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     if (pokemon != null) {
                         PokemonDetailScreen(
@@ -71,282 +74,280 @@ fun PokemonDetailScreen(
     val imageUrl = pokemon.sprites.other?.officialArtwork?.front_default
         ?: pokemon.sprites.front_default
 
+    // Deteksi dark mode
+    val isDarkMode = isSystemInDarkTheme()
+
     // Deteksi orientasi landscape
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
-        ) {
-            // Spacer untuk back button
-            Spacer(modifier = Modifier.height(48.dp))
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Bagian atas - Header (Nomor & Nama) - mengikuti dark mode
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 64.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Nomor Pokemon
+                Text(
+                    text = "#${pokemon.id.toString().padStart(4, '0')}",
+                    fontSize = if (isLandscape) 16.sp else 20.sp,
+                    color = if (isDarkMode) Color.LightGray else Color.Gray,
+                    fontWeight = FontWeight.Bold
+                )
 
-            if (isLandscape) {
-                // Layout Landscape: Gambar di kiri, Info di kanan
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                Spacer(modifier = Modifier.height(if (isLandscape) 4.dp else 8.dp))
+
+                // Nama Pokemon
+                Text(
+                    text = pokemon.name.replaceFirstChar { it.uppercase() },
+                    fontSize = if (isLandscape) 24.sp else 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Box putih untuk konten - SELALU PUTIH bahkan di dark mode
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                color = Color.White, // Selalu putih
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                shadowElevation = 4.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
                 ) {
-                    // Kolom Kiri: Gambar, Nomor, dan Nama Pokemon
-                    Column(
-                        modifier = Modifier.weight(0.45f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // Nomor Pokemon
-                        Text(
-                            text = "#${pokemon.id.toString().padStart(4, '0')}",
-                            fontSize = 16.sp,
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        // Nama Pokemon
-                        Text(
-                            text = pokemon.name.replaceFirstChar { it.uppercase() },
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Card Gambar Pokemon (lebih besar)
-                        Card(
-                            modifier = Modifier.size(280.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                            shape = RoundedCornerShape(24.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color(0xFF343539)
-                            )
+                    if (isLandscape) {
+                        // Layout Landscape: Gambar di kiri, Info di kanan
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            SubcomposeAsyncImage(
-                                model = imageUrl,
-                                contentDescription = pokemon.name,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                                loading = {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator()
-                                    }
-                                },
-                                error = {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text("?", fontSize = 64.sp, color = Color.Gray)
+                            // Kolom Kiri: Gambar Pokemon
+                            Column(
+                                modifier = Modifier.weight(0.45f),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                // Card Gambar Pokemon (lebih besar)
+                                Card(
+                                    modifier = Modifier.size(280.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                                    shape = RoundedCornerShape(24.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color(0xFF343539)
+                                    )
+                                ) {
+                                    SubcomposeAsyncImage(
+                                        model = imageUrl,
+                                        contentDescription = pokemon.name,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(16.dp),
+                                        loading = {
+                                            Box(
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                CircularProgressIndicator()
+                                            }
+                                        },
+                                        error = {
+                                            Box(
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text("?", fontSize = 64.sp, color = Color.Gray)
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+
+                            // Kolom Kanan: Info (Type, Tinggi, Berat, Ability)
+                            Column(
+                                modifier = Modifier.weight(0.55f),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                // Types
+                                pokemon.types?.let { types ->
+                                    InfoSectionCompact(title = stringResource(id = R.string.type)) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            types.forEach { typeSlot ->
+                                                TypeChipCompact(typeName = typeSlot.type.name)
+                                            }
+                                        }
                                     }
                                 }
-                            )
-                        }
-                    }
 
-                    // Kolom Kanan: Info (Type, Tinggi, Berat, Ability)
-                    Column(
-                        modifier = Modifier.weight(0.55f),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        // Types
-                        pokemon.types?.let { types ->
-                            InfoSectionCompact(title = "Tipe") {
+                                // Height & Weight
                                 Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
-                                    types.forEach { typeSlot ->
-                                        TypeChipCompact(typeName = typeSlot.type.name)
+                                    InfoCardCompact(
+                                        label = "Tinggi",
+                                        value = "${(pokemon.height ?: 0) / 10.0} m",
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    InfoCardCompact(
+                                        label = "Berat",
+                                        value = "${(pokemon.weight ?: 0) / 10.0} kg",
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+
+                                // Abilities
+                                pokemon.abilities?.let { abilities ->
+                                    InfoSectionCompact(title = stringResource(id = R.string.abylity)) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            abilities.forEach { abilitySlot ->
+                                                AbilityItemCompact(
+                                                    name = abilitySlot.ability.name,
+                                                    isHidden = abilitySlot.isHidden
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
 
-                        // Height & Weight
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            InfoCardCompact(
-                                label = "Tinggi",
-                                value = "${(pokemon.height ?: 0) / 10.0} m",
-                                modifier = Modifier.weight(1f)
-                            )
-                            InfoCardCompact(
-                                label = "Berat",
-                                value = "${(pokemon.weight ?: 0) / 10.0} kg",
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                        // Abilities
-                        pokemon.abilities?.let { abilities ->
-                            InfoSectionCompact(title = "Abiliti") {
-                                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    abilities.forEach { abilitySlot ->
-                                        AbilityItemCompact(
-                                            name = abilitySlot.ability.name,
-                                            isHidden = abilitySlot.isHidden
+                        // Stats di bawah (full width)
+                        pokemon.stats?.let { stats ->
+                            InfoSection(title = stringResource(id = R.string.stats)) {
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    stats.forEach { statSlot ->
+                                        StatBar(
+                                            statName = statSlot.stat.name,
+                                            statValue = statSlot.baseStat
                                         )
                                     }
                                 }
                             }
                         }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Stats di bawah (full width)
-                pokemon.stats?.let { stats ->
-                    InfoSection(title = "Statistik Dasar") {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            stats.forEach { statSlot ->
-                                StatBar(
-                                    statName = statSlot.stat.name,
-                                    statValue = statSlot.baseStat
+                    } else {
+                        // Layout Portrait (Original)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Card Gambar Pokemon
+                            Card(
+                                modifier = Modifier.size(250.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                                shape = RoundedCornerShape(24.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color(0xFF343539)
+                                )
+                            ) {
+                                SubcomposeAsyncImage(
+                                    model = imageUrl,
+                                    contentDescription = pokemon.name,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp),
+                                    loading = {
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator()
+                                        }
+                                    },
+                                    error = {
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text("?", fontSize = 64.sp, color = Color.Gray)
+                                        }
+                                    }
                                 )
                             }
-                        }
-                    }
-                }
-            } else {
-                // Layout Portrait (Original)
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Nomor Pokemon
-                    Text(
-                        text = "#${pokemon.id.toString().padStart(4, '0')}",
-                        fontSize = 20.sp,
-                        color = Color.Gray,
-                        fontWeight = FontWeight.Bold
-                    )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
 
-                    // Nama Pokemon
-                    Text(
-                        text = pokemon.name.replaceFirstChar { it.uppercase() },
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Card Gambar Pokemon
-                    Card(
-                        modifier = Modifier.size(250.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFF343539)
-                        )
-                    ) {
-                        SubcomposeAsyncImage(
-                            model = imageUrl,
-                            contentDescription = pokemon.name,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            loading = {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
+                            // Types
+                            pokemon.types?.let { types ->
+                                InfoSection(title = "Tipe") {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        types.forEach { typeSlot ->
+                                            TypeChip(typeName = typeSlot.type.name)
+                                        }
+                                    }
                                 }
-                            },
-                            error = {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("?", fontSize = 64.sp, color = Color.Gray)
-                                }
+                                Spacer(modifier = Modifier.height(16.dp))
                             }
-                        )
-                    }
 
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    // Types
-                    pokemon.types?.let { types ->
-                        InfoSection(title = "Tipe") {
+                            // Height & Weight
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                types.forEach { typeSlot ->
-                                    TypeChip(typeName = typeSlot.type.name)
+                                InfoCard(
+                                    label = "Tinggi",
+                                    value = "${(pokemon.height ?: 0) / 10.0} m",
+                                    modifier = Modifier.weight(1f)
+                                )
+                                InfoCard(
+                                    label = "Berat",
+                                    value = "${(pokemon.weight ?: 0) / 10.0} kg",
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Abilities
+                            pokemon.abilities?.let { abilities ->
+                                InfoSection(title = "Abiliti") {
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        abilities.forEach { abilitySlot ->
+                                            AbilityItem(
+                                                name = abilitySlot.ability.name,
+                                                isHidden = abilitySlot.isHidden
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+
+                            // Stats
+                            pokemon.stats?.let { stats ->
+                                InfoSection(title = "Statistik Dasar") {
+                                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        stats.forEach { statSlot ->
+                                            StatBar(
+                                                statName = statSlot.stat.name,
+                                                statValue = statSlot.baseStat
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
-                    // Height & Weight
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        InfoCard(
-                            label = "Tinggi",
-                            value = "${(pokemon.height ?: 0) / 10.0} m",
-                            modifier = Modifier.weight(1f)
-                        )
-                        InfoCard(
-                            label = "Berat",
-                            value = "${(pokemon.weight ?: 0) / 10.0} kg",
-                            modifier = Modifier.weight(1f)
-                        )
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    // Abilities
-                    pokemon.abilities?.let { abilities ->
-                        InfoSection(title = "Abiliti") {
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                abilities.forEach { abilitySlot ->
-                                    AbilityItem(
-                                        name = abilitySlot.ability.name,
-                                        isHidden = abilitySlot.isHidden
-                                    )
-                                }
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
-                    // Stats
-                    pokemon.stats?.let { stats ->
-                        InfoSection(title = "Statistik Dasar") {
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                stats.forEach { statSlot ->
-                                    StatBar(
-                                        statName = statSlot.stat.name,
-                                        statValue = statSlot.baseStat
-                                    )
-                                }
-                            }
-                        }
-                    }
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
 
         // Back button (floating)
@@ -355,14 +356,14 @@ fun PokemonDetailScreen(
                 .padding(16.dp)
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(Color.White)
+                .background(if (isDarkMode) Color(0xFF2D2D2D) else Color.White)
                 .clickable(onClick = onBackClick),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
-                tint = Color.Black
+                tint = if (isDarkMode) Color.White else Color.Black
             )
         }
     }

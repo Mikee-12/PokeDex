@@ -1,3 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Pokedex</string>
+    <string name="type">Tipe</string>
+    <string name="abylity">Kemampuan</string>
+    <string name="stats">Statistik Dasar</string>
+    <string name="search_poke">Cari Pokémon (nama atau nomor)</string>
+    <string name="search_type">Cari Tipe</string>
+    <string name="supere">Sangat Efektif Terhadap</string>
+    <string name="notvery">Kurang Efektif Terhadap</string>
+    <string name="weak">Lemah Terhadap</string>
+    <string name="resis">Tahan Terhadap</string>
+    <string name="imune">Imun Terhadap</string>
+    <string name="filter">Filter Berdasarkan Tipe:</string>
 </resources>

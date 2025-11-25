@@ -5,9 +5,12 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -22,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,7 +43,13 @@ class PokemonListActivity : ComponentActivity() {
 
         setContent {
             PokedexTheme {
-                PokemonListScreen()
+                // Gunakan Surface dengan MaterialTheme colors agar mengikuti theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    PokemonListScreen()
+                }
             }
         }
     }
@@ -62,6 +72,9 @@ fun PokemonListScreen() {
     var pokemonList by remember { mutableStateOf<List<Pokemon>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
     var selectedType by remember { mutableStateOf<String?>(null) }
+
+    // Deteksi dark mode
+    val isDarkMode = isSystemInDarkTheme()
 
     // Generate daftar range pokemon (1-60, 61-120, ..., 961-1020, 1021-1025)
     val pokemonRanges = remember {
@@ -114,35 +127,83 @@ fun PokemonListScreen() {
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
-        // Search Box dan Dropdown - Bersebelahan saat landscape
-        if (isLandscape) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Search Box (Kiri)
+        // Bagian atas (Search & Filter) - mengikuti dark mode
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Search Box dan Dropdown - Bersebelahan saat landscape
+            if (isLandscape) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Search Box (Kiri)
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier.weight(1f),
+                        placeholder = { Text(stringResource(id = R.string.search_poke),) },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    // Dropdown Filter Range (Kanan)
+                    ExposedDropdownMenuBox(
+                        expanded = expandedDropdown,
+                        onExpandedChange = { expandedDropdown = it },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        OutlinedTextField(
+                            value = "Pokemon ${selectedRange.label}",
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDropdown)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = expandedDropdown,
+                            onDismissRequest = { expandedDropdown = false }
+                        ) {
+                            pokemonRanges.forEach { range ->
+                                DropdownMenuItem(
+                                    text = { Text("Pokemon ${range.label}") },
+                                    onClick = {
+                                        selectedRange = range
+                                        expandedDropdown = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Portrait mode - vertical layout
+                // Search Box
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("Cari Pokemon...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text(stringResource(id = R.string.search_poke),) },
                     singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black
-                    )
+                    shape = RoundedCornerShape(12.dp)
                 )
 
-                // Dropdown Filter Range (Kanan)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Dropdown Filter Range
                 ExposedDropdownMenuBox(
                     expanded = expandedDropdown,
-                    onExpandedChange = { expandedDropdown = it },
-                    modifier = Modifier.weight(1f)
+                    onExpandedChange = { expandedDropdown = it }
                 ) {
                     OutlinedTextField(
                         value = "Pokemon ${selectedRange.label}",
@@ -154,11 +215,7 @@ fun PokemonListScreen() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.Black,
-                            unfocusedTextColor = Color.Black
-                        )
+                        shape = RoundedCornerShape(12.dp)
                     )
 
                     ExposedDropdownMenu(
@@ -177,56 +234,54 @@ fun PokemonListScreen() {
                     }
                 }
             }
-        } else {
-            // Portrait mode - vertical layout
-            // Search Box
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Cari Pokemon (nama atau nomor)...") },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black
-                )
-            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Dropdown Filter Range
-            ExposedDropdownMenuBox(
-                expanded = expandedDropdown,
-                onExpandedChange = { expandedDropdown = it }
-            ) {
-                OutlinedTextField(
-                    value = "Pokemon ${selectedRange.label}",
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDropdown)
-                    },
+            // Filter by Type dengan scroll horizontal
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.filter),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    // Reset filter button
+                    if (selectedType != null) {
+                        TextButton(
+                            onClick = { selectedType = null },
+                            contentPadding = PaddingValues(horizontal = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Reset filter",
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Reset", fontSize = 12.sp)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Type chips dengan horizontal scroll
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black
-                    )
-                )
-
-                ExposedDropdownMenu(
-                    expanded = expandedDropdown,
-                    onDismissRequest = { expandedDropdown = false }
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    pokemonRanges.forEach { range ->
-                        DropdownMenuItem(
-                            text = { Text("Pokemon ${range.label}") },
+                    pokemonTypes.forEach { type ->
+                        TypeFilterChip(
+                            typeName = type,
+                            isSelected = selectedType == type,
                             onClick = {
-                                selectedRange = range
-                                expandedDropdown = false
+                                selectedType = if (selectedType == type) null else type
                             }
                         )
                     }
@@ -234,112 +289,76 @@ fun PokemonListScreen() {
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Filter by Type dengan scroll horizontal
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Filter Berdasarkan Tipe:",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
-
-                // Reset filter button
-                if (selectedType != null) {
-                    TextButton(
-                        onClick = { selectedType = null },
-                        contentPadding = PaddingValues(horizontal = 8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Reset filter",
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Reset", fontSize = 12.sp)
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Type chips dengan horizontal scroll
-            Row(
+        // Box putih untuk Pokemon List - SELALU PUTIH bahkan di dark mode
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            color = Color.White, // Selalu putih
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            shadowElevation = 4.dp
+        ) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .fillMaxSize()
+                    .padding(16.dp)
             ) {
-                pokemonTypes.forEach { type ->
-                    TypeFilterChip(
-                        typeName = type,
-                        isSelected = selectedType == type,
-                        onClick = {
-                            selectedType = if (selectedType == type) null else type
+                // Loading atau Grid Pokemon
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator()
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Memuat Pokemon ${selectedRange.label}...",
+                                color = Color.Black // Text hitam karena background putih
+                            )
                         }
-                    )
-                }
-            }
-        }
+                    }
+                } else {
+                    // Info jumlah hasil
+                    if (selectedType != null || searchQuery.isNotBlank()) {
+                        Text(
+                            text = "Menampilkan ${filteredPokemon.size} Pokemon",
+                            fontSize = 12.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
 
-        Spacer(modifier = Modifier.height(16.dp))
+                    // Grid Pokemon (3 kolom portrait, 5 kolom landscape)
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(if (isLandscape) 5 else 3),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        itemsIndexed(
+                            items = filteredPokemon,
+                            key = { _, pokemon -> pokemon.id }
+                        ) { _, pokemon ->
+                            PokemonGridItem(pokemon, isLandscape)
+                        }
+                    }
 
-        // Loading atau Grid Pokemon
-        if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Memuat Pokemon ${selectedRange.label}...")
-                }
-            }
-        } else {
-            // Info jumlah hasil
-            if (selectedType != null || searchQuery.isNotBlank()) {
-                Text(
-                    text = "Menampilkan ${filteredPokemon.size} Pokemon",
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-
-            // Grid Pokemon (3 kolom portrait, 5 kolom landscape)
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(if (isLandscape) 5 else 3),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
-                itemsIndexed(
-                    items = filteredPokemon,
-                    key = { _, pokemon -> pokemon.id }
-                ) { _, pokemon ->
-                    PokemonGridItem(pokemon, isLandscape)
-                }
-            }
-
-            // Jika hasil filter kosong
-            if (filteredPokemon.isEmpty() && !isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Tidak ada Pokemon yang ditemukan",
-                        color = Color.Gray,
-                        textAlign = TextAlign.Center
-                    )
+                    // Jika hasil filter kosong
+                    if (filteredPokemon.isEmpty() && !isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Tidak ada Pokemon yang ditemukan",
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -408,12 +427,15 @@ fun PokemonGridItem(pokemon: Pokemon, isLandscape: Boolean = false) {
                 context.startActivity(intent)
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF2D2D2D) // Card gelap seperti TypeCard
+        )
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
+                .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -421,7 +443,7 @@ fun PokemonGridItem(pokemon: Pokemon, isLandscape: Boolean = false) {
             Text(
                 text = "#${pokemon.id.toString().padStart(4, '0')}",
                 fontSize = 12.sp,
-                color = Color.Gray
+                color = Color.LightGray
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -440,7 +462,8 @@ fun PokemonGridItem(pokemon: Pokemon, isLandscape: Boolean = false) {
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp
+                            strokeWidth = 2.dp,
+                            color = Color.White
                         )
                     }
                 },
@@ -449,25 +472,23 @@ fun PokemonGridItem(pokemon: Pokemon, isLandscape: Boolean = false) {
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("?", fontSize = 24.sp, color = Color.Gray)
+                        Text("?", fontSize = 24.sp, color = Color.White)
                     }
                 }
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Nama Pokemon
             Text(
                 text = pokemon.name.replaceFirstChar { it.uppercase() },
                 fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White
             )
         }
     }
 }
-
-// Helper function untuk warna type - menggunakan fungsi dari PokemonDetailsActivity
-// Pastikan fungsi getTypeColor() sudah ada di PokemonDetailsActivity.kt
-// atau pindahkan ke file utils terpisah untuk menghindari duplikasi

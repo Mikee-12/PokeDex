@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,14 +52,7 @@ fun DashboardScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFFF5F5F5),
-                        Color(0xFFE3F2FD)
-                    )
-                )
-            )
+            .background(MaterialTheme.colorScheme.background)
     ) {
         if (isLandscape) {
             // Layout Landscape: Logo kiri, Button kanan
@@ -92,7 +86,7 @@ fun DashboardScreen() {
                     Spacer(modifier = Modifier.height(20.dp))
 
                     PokemonButton(
-                        text = "Type",
+                        text = stringResource(id = R.string.type),
                         backgroundColor = pokemonYellow,
                         textColor = Color.Black,
                         onClick = {
@@ -102,20 +96,6 @@ fun DashboardScreen() {
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
-
-                    // Decorative Pokeballs
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        repeat(3) {
-                            Box(
-                                modifier = Modifier
-                                    .size(12.dp)
-                                    .clip(CircleShape)
-                                    .background(pokemonRed.copy(alpha = 0.3f))
-                            )
-                        }
-                    }
                 }
             }
         } else {
@@ -143,7 +123,7 @@ fun DashboardScreen() {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 PokemonButton(
-                    text = "Type",
+                    text = stringResource(id = R.string.type),
                     backgroundColor = pokemonYellow,
                     textColor = Color.Black,
                     onClick = {
@@ -160,12 +140,6 @@ fun DashboardScreen() {
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
                     repeat(3) {
-                        Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .clip(CircleShape)
-                                .background(pokemonRed.copy(alpha = 0.3f))
-                        )
                     }
                 }
             }
