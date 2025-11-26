@@ -262,7 +262,7 @@ fun PokemonListScreen() {
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Reset", fontSize = 12.sp)
+                            Text(stringResource(id = R.string.clear), fontSize = 12.sp)
                         }
                     }
                 }
@@ -313,7 +313,7 @@ fun PokemonListScreen() {
                             CircularProgressIndicator()
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Memuat Pokemon ${selectedRange.label}...",
+                                text = stringResource(id = R.string.loadingdata) + " ${selectedRange.label}...",
                                 color = Color.Black // Text hitam karena background putih
                             )
                         }
@@ -322,7 +322,7 @@ fun PokemonListScreen() {
                     // Info jumlah hasil
                     if (selectedType != null || searchQuery.isNotBlank()) {
                         Text(
-                            text = "Menampilkan ${filteredPokemon.size} Pokemon",
+                            text = stringResource(id = R.string.show) + " ${filteredPokemon.size} Pokemon",
                             fontSize = 12.sp,
                             color = Color.Gray,
                             modifier = Modifier.padding(bottom = 8.dp)

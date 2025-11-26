@@ -154,7 +154,7 @@ fun TypeChartScreen() {
                             CircularProgressIndicator()
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Memuat Type Pokemon...",
+                                text = stringResource(id = R.string.loadingdata),
                                 color = Color.Black // Text hitam karena background putih
                             )
                         }

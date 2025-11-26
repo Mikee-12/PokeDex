@@ -12,4 +12,7 @@
     <string name="resis">Tahan Terhadap</string>
     <string name="imune">Imun Terhadap</string>
     <string name="filter">Filter Berdasarkan Tipe:</string>
+    <string name="loadingdata">Memuat Data</string>
+    <string name="clear">Bersih</string>
+    <string name="show">Menampilkan</string>
 </resources>

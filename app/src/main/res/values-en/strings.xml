@@ -11,5 +11,8 @@
     <string name="weak">Weak Against</string>
     <string name="resis">Resistant To</string>
     <string name="imune">Immune To</string>
-    <string name="filter">Filter Berdasarkan Tipe :</string>
+    <string name="filter">Filter by Type :</string>
+    <string name="loadingdata">Loading Data</string>
+    <string name="clear">Clear</string>
+    <string name="show">Show</string>
 </resources>

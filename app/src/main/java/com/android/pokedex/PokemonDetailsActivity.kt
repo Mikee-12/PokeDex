@@ -281,7 +281,7 @@ fun PokemonDetailScreen(
 
                             // Types
                             pokemon.types?.let { types ->
-                                InfoSection(title = "Tipe") {
+                                InfoSection(title = stringResource(id = R.string.type),) {
                                     Row(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         modifier = Modifier.fillMaxWidth(),
@@ -316,7 +316,7 @@ fun PokemonDetailScreen(
 
                             // Abilities
                             pokemon.abilities?.let { abilities ->
-                                InfoSection(title = "Abiliti") {
+                                InfoSection(title = stringResource(id = R.string.abylity),) {
                                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                         abilities.forEach { abilitySlot ->
                                             AbilityItem(
@@ -331,7 +331,7 @@ fun PokemonDetailScreen(
 
                             // Stats
                             pokemon.stats?.let { stats ->
-                                InfoSection(title = "Statistik Dasar") {
+                                InfoSection(title = stringResource(id = R.string.stats),) {
                                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                         stats.forEach { statSlot ->
                                             StatBar(
